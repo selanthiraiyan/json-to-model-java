@@ -33,7 +33,7 @@ public class Main {
 
 	public static final String[] unwantedContainsArray = {
 		"org.apache.commons.lang.builder", "org.codehaus.jackson",
-		"javax.annotation", "private Map<String, Object>"};
+		"javax.annotation", "additionalProperties>"};
 
 	public static final String[] unwantedStartsWithArray = { "@" };
 
@@ -50,6 +50,7 @@ public class Main {
 		BufferedReader reader = new BufferedReader(fileReader);
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
 
 		String currentLine;
 
@@ -84,9 +85,32 @@ public class Main {
 				continue;
 			}
 
+
+
+			if (currentLine.startsWith("public class") && f.getName().startsWith("Data")) {
+				
+				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
+
+				dataHolder.append("public class Data implements PojoDataPartInterface {\n");
+				File servlet = f.getParentFile().getParentFile();
+				File base = servlet.getParentFile();
+				
+				
+				String getServletGroupMethod = "public String getServletGroup() {\n return \"" + base.getName() + "\";\n }";
+				String getServletNameMethod = "public String getServletName() {\n return \"" + servlet.getName() + "\";\n }";
+				dataHolder.append(getServletGroupMethod);
+				dataHolder.append("\n");
+				dataHolder.append(getServletNameMethod);
+				
+				continue;
+			}
+			
 			dataHolder.append(currentLine);
 			dataHolder.append("\n");
 		}
+		
+
+
 		String modifiedData = dataHolder.toString();
 
 		writer.write(modifiedData);
