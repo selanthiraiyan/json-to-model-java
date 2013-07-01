@@ -1,0 +1,25 @@
+
+<project name="Finance" default="generatePojo">
+    
+	<taskdef name="jsonschema2pojo"
+		classname="com.googlecode.jsonschema2pojo.ant.Jsonschema2PojoTask">
+		<classpath> <!-- classpath only required if jars have *NOT* been added to $ANT_HOME/lib -->
+			<fileset dir="lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</classpath>
+	</taskdef>
+
+	<target name="generatePojo">
+		<jsonschema2pojo 
+		    source="${source}"
+			targetDirectory="${targetDirectory}" 
+			targetPackage="${targetPackage}"
+			sourceType="JSON" 
+			useLongIntegers="true"
+			includeHashcodeAndEquals="false"
+			includeToString="false"
+			annotationStyle="NONE"/>
+	</target>
+
+</project>
