@@ -12,8 +12,9 @@ public class PathHolder {
         
    static String CHECKOUT_PATH="temp";
    static String SOURCE_PATH=CHECKOUT_PATH + File.separator + "FinanceJSONFiles";
-   static String POJO_TARGET_PATH=MAIN_FOLDER+File.separator+"pojo";
-   
+   static String TEMP_POJO=CHECKOUT_PATH+File.separator+"pojo";
+   static String POJO_TARGET_PATH=MAIN_FOLDER + File.separator + "pojo";
+
    
    static String SVN_PATH="https://subversion.assembla.com/svn/wethejumpingspiders/trunk/server/Finance-AppEngine/trunk/FinanceJSONFiles/";
    static String USERNAME;

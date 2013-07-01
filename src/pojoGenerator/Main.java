@@ -24,11 +24,80 @@ public class Main {
 		File f = new File(PathHolder.SOURCE_PATH);
 		generatePojoClasses(f);
 
-		File pojoPath = new File(PathHolder.POJO_TARGET_PATH);
+		File pojoPath = new File(PathHolder.TEMP_POJO);
 		removeUnwantedFilesAndStrings(pojoPath);
+		
+		System.out.println("\nCompleted generating pojo's at path " + PathHolder.POJO_TARGET_PATH);
+
 	}
 
-	private static void removeUnwantedFilesAndStrings(File f) {		
+	public static final String[] unwantedContainsArray = {
+		"org.apache.commons.lang.builder", "org.codehaus.jackson",
+		"javax.annotation", "private Map<String, Object>"};
+
+	public static final String[] unwantedStartsWithArray = { "@" };
+
+	private static void refactorFileAndGenerateDuplicate(File f) throws Exception {
+		String path = PathHolder.POJO_TARGET_PATH + File.separator + f.getPath().substring(f.getPath().indexOf("com" + File.separator));
+
+		File targetFile = new File(path);
+		File parent = targetFile.getParentFile();
+		if(!parent.exists() && !parent.mkdirs()){
+		    throw new IllegalStateException("Couldn't create dir: " + parent);
+		}
+		
+		FileReader fileReader = new FileReader(f);
+		BufferedReader reader = new BufferedReader(fileReader);
+
+		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+
+		String currentLine;
+
+		boolean isValueFound = false;
+
+		StringBuilder dataHolder = new StringBuilder();
+
+		while ((currentLine = reader.readLine()) != null) {
+			String trimmedLine = currentLine.trim();
+
+			isValueFound = false;
+			for (String value : unwantedStartsWithArray) {
+				if (trimmedLine.startsWith(value)) {
+					isValueFound = true;
+					break;
+				}
+			}
+
+			if (isValueFound) {
+				continue;
+			}
+			
+			isValueFound = false;
+			for (String value : unwantedContainsArray) {
+				if (trimmedLine.contains(value)) {
+					isValueFound = true;
+					break;
+				}
+			}
+
+			if (isValueFound) {
+				continue;
+			}
+
+			dataHolder.append(currentLine);
+			dataHolder.append("\n");
+		}
+		String modifiedData = dataHolder.toString();
+
+		writer.write(modifiedData);
+
+		fileReader.close();
+		writer.flush();
+		writer.close();
+
+	}
+
+	private static void removeUnwantedFilesAndStrings(File f) throws Exception{		
 		for (File file : f.listFiles()) {
 			if (file.isDirectory()) {
 				removeUnwantedFilesAndStrings(file);
@@ -38,12 +107,12 @@ public class Main {
 					String[] nameOfFilesToBeDeleted = {"Request.java", "Request_.java", "Echo.java", "Response.java", "Response_.java"};					
 					for (int i = 0; i < nameOfFilesToBeDeleted.length; i++) {
 						if (file.getName().equalsIgnoreCase(nameOfFilesToBeDeleted[i])) {
-							System.out.println("Deleting file at " + file.getPath());
 							deleteDir(file);
 							return;
 						}
 					}
 
+					refactorFileAndGenerateDuplicate(file);
 
 				}
 			}
@@ -65,10 +134,10 @@ public class Main {
 					String basePackage = PathHolder.PACKAGENAME + "." + base.getName() + "." + servlet.getName();
 
 					if (file.getName().startsWith("request")) {
-						createPojo(file.getAbsolutePath(), PathHolder.POJO_TARGET_PATH, basePackage + ".Request");
+						createPojo(file.getAbsolutePath(), PathHolder.TEMP_POJO, basePackage + ".Request");
 					}
 					else if (file.getName().startsWith("response")) {
-						createPojo(file.getAbsolutePath(), PathHolder.POJO_TARGET_PATH, basePackage + ".Response");
+						createPojo(file.getAbsolutePath(), PathHolder.TEMP_POJO, basePackage + ".Response");
 					}
 				}
 			}
@@ -101,7 +170,7 @@ public class Main {
 	}
 
 	public static void deleteFolders() {
-		String[] dirCreater = { PathHolder.SCHEMA_FILE, PathHolder.POJO_TARGET_PATH};
+		String[] dirCreater = { PathHolder.SCHEMA_FILE, PathHolder.POJO_TARGET_PATH, PathHolder.TEMP_POJO};
 		for (int i = 0; i < dirCreater.length; i++) {
 			deleteDir(new File(dirCreater[i]));
 		}
@@ -109,7 +178,7 @@ public class Main {
 
 	public static void createParentStructure() {
 		String[] path = {
-				PathHolder.CHECKOUT_PATH, PathHolder.POJO_TARGET_PATH};
+				PathHolder.CHECKOUT_PATH, PathHolder.POJO_TARGET_PATH, PathHolder.TEMP_POJO};
 		File mainFolder = new File(PathHolder.MAIN_FOLDER);
 		if (mainFolder.exists()) {
 			deleteDir(mainFolder);
