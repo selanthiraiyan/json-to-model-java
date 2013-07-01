@@ -1,7 +1,5 @@
 package pojoGenerator;
 
-import PathHolder;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -12,8 +10,6 @@ import java.io.InputStreamReader;
 
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
-
-import pojoGenerator.ServiceProvider.Service;
 
 
 public class Main {
@@ -54,72 +50,6 @@ public class Main {
 		}
 	}
 
-	public static final String[] unwantedContainsArray = {
-		"org.apache.commons.lang.builder", "org.codehaus.jackson",
-		"javax.annotation", "private Map<String, Object>" };
-	public static final String[] unwantedStartsWithArray = { "@" };
-
-	public static void readWriteFiles(File file, String fileName, String schema)
-			throws Exception {
-		String path = getUniversalPath() + File.separator
-				+ PathHolder.JACKSON_MODIFIED
-				+ (schema.toLowerCase() + File.separator + fileName);
-
-		FileReader fileReader = new FileReader(file);
-		BufferedReader reader = new BufferedReader(fileReader);
-
-		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
-
-		// writer.write("package "+PACKAGENAME+"."+ schema + ";\n");
-		writer.write("package " + schema.toLowerCase() + ";\n");
-
-		String currentLine;
-
-		boolean isValueFound = false;
-
-		StringBuilder dataHolder = new StringBuilder();
-
-		while ((currentLine = reader.readLine()) != null) {
-			String trimmedLine = currentLine.trim();
-
-			removeBlock(reader, currentLine, "@JsonSerialize", "})");
-
-			isValueFound = false;
-			for (String value : unwantedStartsWithArray) {
-				if (trimmedLine.startsWith(value)) {
-					isValueFound = true;
-					break;
-				}
-			}
-
-			if (isValueFound) {
-				continue;
-			}
-
-			isValueFound = false;
-			for (String value : unwantedContainsArray) {
-				if (trimmedLine.contains(value)) {
-					isValueFound = true;
-					break;
-				}
-			}
-
-			if (isValueFound) {
-				continue;
-			}
-
-			dataHolder.append(currentLine);
-			dataHolder.append("\n");
-		}
-		String modifiedData = dataHolder.toString();
-
-		writer.write(modifiedData);
-
-		fileReader.close();
-		writer.flush();
-		writer.close();
-
-	}
 	private static void generatePojoClasses(File f) {		
 		for (File file : f.listFiles()) {
 			if (file.isDirectory()) {
