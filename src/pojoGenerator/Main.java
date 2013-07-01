@@ -41,7 +41,6 @@ public class Main {
 							System.out.println("Deleting file at " + file.getPath());
 							deleteDir(file);
 							return;
-							//Commit test
 						}
 					}
 
