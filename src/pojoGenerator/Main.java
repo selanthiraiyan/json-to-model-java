@@ -1,5 +1,6 @@
 package pojoGenerator;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,6 +8,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
@@ -26,9 +30,53 @@ public class Main {
 
 		File pojoPath = new File(PathHolder.TEMP_POJO);
 		removeUnwantedFilesAndStrings(pojoPath);
-		
+
 		System.out.println("\nCompleted generating pojo's at path " + PathHolder.POJO_TARGET_PATH);
 
+	}
+
+	public static String getUniversalPath() {
+		File directory = new File(".");
+		return directory.getAbsolutePath();
+	}
+
+	private static String getFileNameWithoutExtension(File f) {
+		  String complete = f.getAbsolutePath();
+		  int start = complete.lastIndexOf("/") + 1;
+		  int end = complete.lastIndexOf(".");
+		  end = start < end ? end : complete.length();
+		  String name = complete.substring(start, end);
+		  System.out.println("getFileNameWithoutExtension " + name);
+		  return name;
+	}
+	
+	public static void generateObjCClass(File f) {
+
+		try {
+
+			File location = new File(PathHolder.POJO_TARGET_PATH);
+
+			File folder = f.getParentFile();
+			File servlet = folder.getParentFile();
+			File base = servlet.getParentFile();
+			String basePackage = PathHolder.PACKAGENAME + "." + base.getName() + "." + servlet.getName()  + "." + folder.getName();
+
+			URLClassLoader myClassLoader = URLClassLoader
+					.newInstance(new URL[] { location.toURI()
+							.toURL() });
+
+			Class c = Class.forName(basePackage + "." + getFileNameWithoutExtension(f), true, myClassLoader);
+
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}  catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static final String[] unwantedContainsArray = {
@@ -43,9 +91,9 @@ public class Main {
 		File targetFile = new File(path);
 		File parent = targetFile.getParentFile();
 		if(!parent.exists() && !parent.mkdirs()){
-		    throw new IllegalStateException("Couldn't create dir: " + parent);
+			throw new IllegalStateException("Couldn't create dir: " + parent);
 		}
-		
+
 		FileReader fileReader = new FileReader(f);
 		BufferedReader reader = new BufferedReader(fileReader);
 
@@ -72,7 +120,7 @@ public class Main {
 			if (isValueFound) {
 				continue;
 			}
-			
+
 			isValueFound = false;
 			for (String value : unwantedContainsArray) {
 				if (trimmedLine.contains(value)) {
@@ -88,27 +136,27 @@ public class Main {
 
 
 			if (currentLine.startsWith("public class") && f.getName().startsWith("Data")) {
-				
+
 				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
 
 				dataHolder.append("public class Data implements PojoDataPartInterface {\n");
 				File servlet = f.getParentFile().getParentFile();
 				File base = servlet.getParentFile();
-				
-				
+
+
 				String getServletGroupMethod = "public String getServletGroup() {\n return \"" + base.getName() + "\";\n }";
 				String getServletNameMethod = "public String getServletName() {\n return \"" + servlet.getName() + "\";\n }";
 				dataHolder.append(getServletGroupMethod);
 				dataHolder.append("\n");
 				dataHolder.append(getServletNameMethod);
-				
+
 				continue;
 			}
-			
+
 			dataHolder.append(currentLine);
 			dataHolder.append("\n");
 		}
-		
+
 
 
 		String modifiedData = dataHolder.toString();
@@ -137,7 +185,7 @@ public class Main {
 					}
 
 					refactorFileAndGenerateDuplicate(file);
-
+					generateObjCClass(file);
 				}
 			}
 		}
