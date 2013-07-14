@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
-
 public class Main {
 
 	public static void main(String[] args) throws Exception {
@@ -26,11 +25,20 @@ public class Main {
 
 		File pojoPath = new File(PathHolder.TEMP_POJO);
 		removeUnwantedFilesAndStrings(pojoPath);
-		
+
 		System.out.println("\nCompleted generating pojo's at path " + PathHolder.POJO_TARGET_PATH);
+
 
 	}
 
+	private static String getFileNameWithoutExtension(String name) {
+		int pos = name.lastIndexOf(".");
+		if (pos > 0) {
+		    name = name.substring(0, pos);
+		}
+		return name;
+	}
+	
 	public static final String[] unwantedContainsArray = {
 		"org.apache.commons.lang.builder", "org.codehaus.jackson",
 		"javax.annotation", "additionalProperties>"};
@@ -43,9 +51,9 @@ public class Main {
 		File targetFile = new File(path);
 		File parent = targetFile.getParentFile();
 		if(!parent.exists() && !parent.mkdirs()){
-		    throw new IllegalStateException("Couldn't create dir: " + parent);
+			throw new IllegalStateException("Couldn't create dir: " + parent);
 		}
-		
+
 		FileReader fileReader = new FileReader(f);
 		BufferedReader reader = new BufferedReader(fileReader);
 
@@ -72,7 +80,7 @@ public class Main {
 			if (isValueFound) {
 				continue;
 			}
-			
+
 			isValueFound = false;
 			for (String value : unwantedContainsArray) {
 				if (trimmedLine.contains(value)) {
@@ -87,28 +95,32 @@ public class Main {
 
 
 
-			if (currentLine.startsWith("public class") && f.getName().startsWith("Data")) {
-				
-				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
+			if (currentLine.startsWith("public class")) {
 
-				dataHolder.append("public class Data implements PojoDataPartInterface {\n");
+				dataHolder.append("import com.google.gson.Gson;\n");
+
+				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
+				dataHolder.append("public class " + getFileNameWithoutExtension(f.getName()) + " implements PojoDataPartInterface {\n");
 				File servlet = f.getParentFile().getParentFile();
 				File base = servlet.getParentFile();
-				
-				
+
+
 				String getServletGroupMethod = "public String getServletGroup() {\n return \"" + base.getName() + "\";\n }";
 				String getServletNameMethod = "public String getServletName() {\n return \"" + servlet.getName() + "\";\n }";
+				String toJSON = "public String toJSON() {\n Gson gson = new Gson(); \n return gson.toJson(this.getClass());\n }";
 				dataHolder.append(getServletGroupMethod);
 				dataHolder.append("\n");
 				dataHolder.append(getServletNameMethod);
-				
+				dataHolder.append("\n");
+				dataHolder.append(toJSON);
+
 				continue;
 			}
-			
+
 			dataHolder.append(currentLine);
 			dataHolder.append("\n");
 		}
-		
+
 
 
 		String modifiedData = dataHolder.toString();
