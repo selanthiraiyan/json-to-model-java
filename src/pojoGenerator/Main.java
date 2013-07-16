@@ -41,7 +41,7 @@ public class Main {
 	
 	public static final String[] unwantedContainsArray = {
 		"org.apache.commons.lang.builder", "org.codehaus.jackson",
-		"javax.annotation", "additionalProperties>"};
+		"javax.annotation", "additionalProperties"};
 
 	public static final String[] unwantedStartsWithArray = { "@" };
 
