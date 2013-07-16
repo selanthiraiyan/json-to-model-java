@@ -1,5 +1,6 @@
 package pojoGenerator;
 
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,6 +8,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
@@ -149,7 +153,6 @@ public class Main {
 					}
 
 					refactorFileAndGenerateDuplicate(file);
-
 				}
 			}
 		}
