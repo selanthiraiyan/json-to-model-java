@@ -107,7 +107,7 @@ public class Main {
 
 				String getServletGroupMethod = "public String getServletGroup() {\n return \"" + base.getName() + "\";\n }";
 				String getServletNameMethod = "public String getServletName() {\n return \"" + servlet.getName() + "\";\n }";
-				String toJSON = "public String toJSON() {\n Gson gson = new Gson(); \n return gson.toJson(this.getClass());\n }";
+				String toJSON = "public String toJSON() {\n Gson gson = new Gson(); \n return gson.toJson(this);\n }";
 				dataHolder.append(getServletGroupMethod);
 				dataHolder.append("\n");
 				dataHolder.append(getServletNameMethod);
