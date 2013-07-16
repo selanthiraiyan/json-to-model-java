@@ -102,9 +102,10 @@ public class Main {
 			if (currentLine.startsWith("public class")) {
 
 				dataHolder.append("import com.google.gson.Gson;\n");
-
+				dataHolder.append("import java.io.Serializable;\n");
+				
 				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
-				dataHolder.append("public class " + getFileNameWithoutExtension(f.getName()) + " implements PojoDataPartInterface {\n");
+				dataHolder.append("public class " + getFileNameWithoutExtension(f.getName()) + " implements PojoDataPartInterface, Serializable {\n");
 				File servlet = f.getParentFile().getParentFile();
 				File base = servlet.getParentFile();
 
