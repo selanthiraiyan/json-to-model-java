@@ -41,7 +41,7 @@ public class Main {
 	
 	public static final String[] unwantedContainsArray = {
 		"org.apache.commons.lang.builder", "org.codehaus.jackson",
-		"javax.annotation", "additionalProperties"};
+		"javax.annotation"};
 
 	public static final String[] unwantedStartsWithArray = { "@" };
 
@@ -83,7 +83,7 @@ public class Main {
 
 			isValueFound = false;
 			for (String value : unwantedContainsArray) {
-				if (trimmedLine.contains(value)) {
+				if (trimmedLine.toLowerCase().contains(value.toLowerCase())) {
 					isValueFound = true;
 					break;
 				}
