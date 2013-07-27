@@ -57,7 +57,7 @@ public class Main {
 		if(!parent.exists() && !parent.mkdirs()){
 			throw new IllegalStateException("Couldn't create dir: " + parent);
 		}
-
+		
 		FileReader fileReader = new FileReader(f);
 		BufferedReader reader = new BufferedReader(fileReader);
 
@@ -139,21 +139,33 @@ public class Main {
 	}
 
 	private static void removeUnwantedFilesAndStrings(File f) throws Exception{		
+		
+		
+
 		for (File file : f.listFiles()) {
+
 			if (file.isDirectory()) {
+
 				removeUnwantedFilesAndStrings(file);
 			}
 			else {
-				if (file.getName().endsWith(".java")) {
-					String[] nameOfFilesToBeDeleted = {"Request.java", "Request_.java", "Echo.java", "Response.java", "Response_.java"};					
+				
+				if (file.getName().endsWith(".java"))
+				{
+					String[] nameOfFilesToBeDeleted = {"Request.java", "Request_.java", "Echo.java", "Response.java", "Response_.java"};	
+					boolean canGenerate = true;
 					for (int i = 0; i < nameOfFilesToBeDeleted.length; i++) {
 						if (file.getName().equalsIgnoreCase(nameOfFilesToBeDeleted[i])) {
-							deleteDir(file);
-							return;
+							canGenerate = false;
 						}
 					}
-
-					refactorFileAndGenerateDuplicate(file);
+					
+					if (canGenerate) {
+						 refactorFileAndGenerateDuplicate(file);
+					}
+					else {
+						System.out.println("Igonoring " + file.getName() + " at path " + file.getPath());
+					}
 				}
 			}
 		}
