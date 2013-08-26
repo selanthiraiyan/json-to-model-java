@@ -8,12 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.ProjectHelper;
 
 public class Main {
 
@@ -63,6 +58,7 @@ public class Main {
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(path));
 
+		System.out.println("\nCreating class file at path " + path);
 
 		String currentLine;
 
@@ -140,7 +136,10 @@ public class Main {
 
 	private static void removeUnwantedFilesAndStrings(File f) throws Exception{		
 		for (File file : f.listFiles()) {
+			System.out.println("\nProcessing file at " + file.getAbsolutePath());
+
 			if (file.isDirectory()) {
+
 				removeUnwantedFilesAndStrings(file);
 			}
 			else {
@@ -149,6 +148,9 @@ public class Main {
 					for (int i = 0; i < nameOfFilesToBeDeleted.length; i++) {
 						if (file.getName().equalsIgnoreCase(nameOfFilesToBeDeleted[i])) {
 							deleteDir(file);
+							
+							System.out.println("\nSkipping file at path " + file.getAbsolutePath());
+
 							return;
 						}
 					}
@@ -189,17 +191,15 @@ public class Main {
 		System.out.println("\nTrying to generate POJO from " + fromJSONFileNamed
 				+ " \nto: " + targetFolder + "\nusingPackageName " + packageName);
 
-		File buildFile = new File("build.xml");
-		Project p = new Project();
-		p.setUserProperty("ant.file", buildFile.getAbsolutePath());
-		p.setUserProperty("targetPackage", packageName);
-		p.setUserProperty("targetDirectory", targetFolder);
-		p.setUserProperty("source", fromJSONFileNamed);
-		p.init();
-		ProjectHelper helper = ProjectHelper.getProjectHelper();
-		p.addReference("ant.projectHelper", helper);
-		helper.parse(p, buildFile);
-		p.executeTarget(p.getDefaultTarget());
+		String command = "ant -Dsource=" + fromJSONFileNamed + " -DtargetPackage=" + packageName + " -DtargetDirectory=" + targetFolder;
+		Process p;
+		try {
+			p = Runtime.getRuntime().exec(command);
+			readFromProcess(p);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void checkOutFiles() throws Exception {
