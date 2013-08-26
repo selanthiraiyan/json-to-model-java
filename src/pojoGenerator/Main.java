@@ -136,8 +136,6 @@ public class Main {
 
 	private static void removeUnwantedFilesAndStrings(File f) throws Exception{		
 		for (File file : f.listFiles()) {
-			System.out.println("\nProcessing file at " + file.getAbsolutePath());
-
 			if (file.isDirectory()) {
 
 				removeUnwantedFilesAndStrings(file);
@@ -148,9 +146,6 @@ public class Main {
 					for (int i = 0; i < nameOfFilesToBeDeleted.length; i++) {
 						if (file.getName().equalsIgnoreCase(nameOfFilesToBeDeleted[i])) {
 							deleteDir(file);
-							
-							System.out.println("\nSkipping file at path " + file.getAbsolutePath());
-
 							return;
 						}
 					}
