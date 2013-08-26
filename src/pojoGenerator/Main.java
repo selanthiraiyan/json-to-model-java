@@ -8,10 +8,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 
@@ -32,20 +28,21 @@ public class Main {
 
 		System.out.println("\nCompleted generating pojo's at path " + PathHolder.POJO_TARGET_PATH);
 
+		System.exit(0);
 
 	}
 
 	private static String getFileNameWithoutExtension(String name) {
 		int pos = name.lastIndexOf(".");
 		if (pos > 0) {
-		    name = name.substring(0, pos);
+			name = name.substring(0, pos);
 		}
 		return name;
 	}
-	
+
 	public static final String[] unwantedContainsArray = {
 		"org.apache.commons.lang.builder", "org.codehaus.jackson",
-		"javax.annotation"};
+	"javax.annotation"};
 
 	public static final String[] unwantedStartsWithArray = { "@" };
 
@@ -57,7 +54,7 @@ public class Main {
 		if(!parent.exists() && !parent.mkdirs()){
 			throw new IllegalStateException("Couldn't create dir: " + parent);
 		}
-		
+
 		FileReader fileReader = new FileReader(f);
 		BufferedReader reader = new BufferedReader(fileReader);
 
@@ -103,7 +100,7 @@ public class Main {
 
 				dataHolder.append("import com.google.gson.Gson;\n");
 				dataHolder.append("import java.io.Serializable;\n");
-				
+
 				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
 				dataHolder.append("public class " + getFileNameWithoutExtension(f.getName()) + " implements PojoDataPartInterface, Serializable {\n");
 				File servlet = f.getParentFile().getParentFile();
@@ -139,8 +136,8 @@ public class Main {
 	}
 
 	private static void removeUnwantedFilesAndStrings(File f) throws Exception{		
-		
-		
+
+
 
 		for (File file : f.listFiles()) {
 
@@ -149,7 +146,7 @@ public class Main {
 				removeUnwantedFilesAndStrings(file);
 			}
 			else {
-				
+
 				if (file.getName().endsWith(".java"))
 				{
 					String[] nameOfFilesToBeDeleted = {"Request.java", "Request_.java", "Echo.java", "Response.java", "Response_.java"};	
@@ -159,9 +156,9 @@ public class Main {
 							canGenerate = false;
 						}
 					}
-					
+
 					if (canGenerate) {
-						 refactorFileAndGenerateDuplicate(file);
+						refactorFileAndGenerateDuplicate(file);
 					}
 					else {
 						System.out.println("Igonoring " + file.getName() + " at path " + file.getPath());
