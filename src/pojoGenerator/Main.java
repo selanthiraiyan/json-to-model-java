@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 
 public class Main {
@@ -33,14 +34,14 @@ public class Main {
 	private static String getFileNameWithoutExtension(String name) {
 		int pos = name.lastIndexOf(".");
 		if (pos > 0) {
-		    name = name.substring(0, pos);
+			name = name.substring(0, pos);
 		}
 		return name;
 	}
-	
+
 	public static final String[] unwantedContainsArray = {
 		"org.apache.commons.lang.builder", "org.codehaus.jackson",
-		"javax.annotation"};
+	"javax.annotation"};
 
 	public static final String[] unwantedStartsWithArray = { "@" };
 
@@ -99,7 +100,7 @@ public class Main {
 
 				dataHolder.append("import com.google.gson.Gson;\n");
 				dataHolder.append("import java.io.Serializable;\n");
-				
+
 				dataHolder.append("import com.wethejumpingspiders.finance.base.PojoDataPartInterface;\n");
 				dataHolder.append("public class " + getFileNameWithoutExtension(f.getName()) + " implements PojoDataPartInterface, Serializable {\n");
 				File servlet = f.getParentFile().getParentFile();
@@ -140,17 +141,23 @@ public class Main {
 
 				removeUnwantedFilesAndStrings(file);
 			}
-			else {
-				if (file.getName().endsWith(".java")) {
-					String[] nameOfFilesToBeDeleted = {"Request.java", "Request_.java", "Echo.java", "Response.java", "Response_.java"};					
+			else {		
+				if (file.getName().endsWith(".java"))
+				{
+					String[] nameOfFilesToBeDeleted = {"Request.java", "Request_.java", "Echo.java", "Response.java", "Response_.java"};	
+					boolean canGenerate = true;
+
 					for (int i = 0; i < nameOfFilesToBeDeleted.length; i++) {
 						if (file.getName().equalsIgnoreCase(nameOfFilesToBeDeleted[i])) {
-							deleteDir(file);
-							return;
+							canGenerate = false;
 						}
 					}
-
-					refactorFileAndGenerateDuplicate(file);
+					if (canGenerate) {
+						refactorFileAndGenerateDuplicate(file);
+					}
+					else {
+						System.out.println("Igonoring " + file.getName() + " at path " + file.getPath());
+					}
 				}
 			}
 		}
@@ -185,14 +192,17 @@ public class Main {
 
 		System.out.println("\nTrying to generate POJO from " + fromJSONFileNamed
 				+ " \nto: " + targetFolder + "\nusingPackageName " + packageName);
+		File buildFile = new File("build.xml");
 
-		String command = "ant -Dsource=" + fromJSONFileNamed + " -DtargetPackage=" + packageName + " -DtargetDirectory=" + targetFolder;
-		Process p;
 		try {
-			p = Runtime.getRuntime().exec(command);
-			readFromProcess(p);
+			ProcessBuilder pb = new ProcessBuilder("ant.bat", "-buildfile", buildFile.getAbsolutePath(), "-Dsource", fromJSONFileNamed, "-DtargetPackage", packageName, "-DtargetDirectory", targetFolder);
+			Map env = pb.environment();
+			String path = (String) env.get("ANT_HOME");
+			pb.directory(new File(path + System.getProperty("file.separator")
+					+ "bin"));
+			Process start = pb.start();
+			readFromProcess(start);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
